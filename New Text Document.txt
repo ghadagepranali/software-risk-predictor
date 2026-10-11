@@ -1,0 +1,41 @@
+
+import pandas as pd
+import numpy as np
+from pathlib import Path
+
+np.random.seed(42)
+n = 300
+
+df = pd.DataFrame({
+    "project_id": [f"PRJ{i:03d}" for i in range(1, n + 1)],
+    "progress_pct": np.random.randint(10, 101, n),
+    "budget_used_pct": np.random.randint(10, 111, n),
+    "team_size": np.random.randint(3, 16, n),
+    "open_bugs": np.random.randint(0, 61, n),
+    "delayed_tasks_pct": np.random.randint(0, 81, n),
+    "requirement_changes": np.random.randint(0, 16, n),
+    "absenteeism_pct": np.random.randint(0, 31, n),
+})
+
+score = (
+    (100 - df["progress_pct"]) * 0.20
+    + df["budget_used_pct"] * 0.15
+    + df["open_bugs"] * 0.50
+    + df["delayed_tasks_pct"] * 0.35
+    + df["requirement_changes"] * 0.80
+    + df["absenteeism_pct"] * 0.30
+)
+
+df["risk_level"] = np.where(
+    score < 50, "Low",
+    np.where(score < 75, "Medium", "High")
+)
+
+output_dir = Path("dataset")
+output_dir.mkdir(parents=True, exist_ok=True)
+
+df.to_csv(output_dir / "software_projects.csv", index=False)
+
+print("Dataset created successfully!")
+print("Total records:", len(df))
+print(df.head())
